@@ -100,6 +100,7 @@ button:active{transform:translate(4px,4px);box-shadow:none}
 <div id="modal"><div><img alt=""><b></b></div></div>
 <script>
 const API=(()=>{try{const p=new URLSearchParams(location.search).get('api');if(p)localStorage.api=p;return(p||localStorage.api||'').replace(/\/$/,'')}catch(e){return ''}})();
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const splash=document.getElementById('splash'),log=document.getElementById('log'),f=document.getElementById('f'),q=document.getElementById('q');
 const hist=[{role:'assistant',content:'수임아 뭐먹을래?'}];
 document.fonts.load('20px "Do Hyeon"','가나다');document.fonts.load('20px "Black Han Sans"','가나다');
