@@ -109,12 +109,15 @@ fetch(API+'/config').then(r=>r.json()).then(c=>{document.getElementById('day').t
 
 function add(t,c){const d=document.createElement('div');d.className='msg '+c;d.textContent=t;log.append(d);log.scrollTop=log.scrollHeight;setTimeout(save,0);return d}
 function go(){splash.classList.add('out');q.focus()}
+let seen=false;try{seen=sessionStorage.splash==='1';sessionStorage.splash='1'}catch(e){}
+if(seen){splash.remove()}else{
 const v=document.getElementById('v');
 splash.onclick=go;
 setTimeout(()=>{v.classList.add('on');v.play().catch(()=>{})},1300);
 v.onended=()=>setTimeout(go,500);
 v.onerror=()=>setTimeout(go,1500);
 setTimeout(go,8000);
+}
 f.onsubmit=async e=>{
   e.preventDefault();const t=q.value.trim();if(!t)return;q.value='';
   add(t,'me');hist.push({role:'user',content:t});
