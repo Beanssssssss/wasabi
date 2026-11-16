@@ -41,6 +41,16 @@ header .char{width:56px;height:56px;border-width:3px;box-shadow:3px 3px 0 var(--
 #modal img{width:min(60vw,260px);display:block;margin:0 auto 12px}
 #modal b{font-family:'Black Han Sans';font-size:clamp(28px,6vw,44px);display:block;background:#fff;color:var(--ink);border:4px solid var(--ink);padding:4px 16px}
 @keyframes mpop{from{transform:scale(.4) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+#ap{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:11;padding:16px}
+#ap.on{display:flex}
+#ap>div{background:#FF3B30;border:6px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:18px;max-width:480px;width:100%;text-align:center;animation:mpop .35s cubic-bezier(.3,1.6,.5,1)}
+#ap img{width:min(45vw,180px);display:block;margin:0 auto 10px}
+#ap b#apt{display:block;font-family:'Black Han Sans';font-size:clamp(24px,5vw,34px);background:#fff;border:4px solid var(--ink);padding:4px 12px;margin-bottom:12px}
+#apx{width:100%;font:inherit;font-size:18px;padding:10px;border:4px solid var(--ink);background:var(--bg);resize:vertical;outline:none}
+#apr{min-height:28px;margin:10px 0;font-size:19px;color:#fff;text-shadow:1px 1px 0 var(--ink)}
+#apr b{font-family:'Black Han Sans';font-size:28px;background:#FFE14D;color:var(--ink);padding:0 10px;border:3px solid var(--ink);text-shadow:none;margin-right:6px}
+#apb{display:flex;gap:10px;justify-content:center}
+#apb button:disabled{opacity:.5}
 #rc{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
 #rc.on{display:flex}
 #rc>div{background:var(--bg);border:6px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:18px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;animation:mpop .35s cubic-bezier(.3,1.6,.5,1)}
@@ -95,6 +105,7 @@ button:active{transform:translate(4px,4px);box-shadow:none}
   <div id="chips"></div>
   <form id="f"><input id="q" autocomplete="off" placeholder="오늘 저녁 뭐 먹지..."><button>전송</button></form>
 </div>
+<div id="ap"><div><img alt=""><b id="apt">반성문 쓰면 봐줄게</b><textarea id="apx" rows="6" maxlength="1000" placeholder="반성문을 써. 80점 이상이면 풀어줄게."></textarea><div id="apr"></div><div id="apb"><button id="aps" type="button">제출</button><button id="apc" type="button">나중에</button></div></div></div>
 <div id="rc"><div><h2>와사비 추천!</h2><div id="rcg"></div></div></div>
 <div id="cat"><div><h2>뭐 땡겨?</h2><div id="cg"></div><p>골라봐 수임아 (바깥 누르면 닫혀)</p></div></div>
 <div id="modal"><div><img alt=""><b></b></div></div>
@@ -125,7 +136,7 @@ f.onsubmit=async e=>{
   const r=await fetch(API+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist,sid})}).then(r=>r.json()).catch(()=>({reply:'잠시만 수임아, 나 똥싸고 있어 조금 있다 연락할게',emotion:'happy',yellow:0,card:''}));
   (r.lines?burst(w,r.lines):speak(w,r.reply));hist.push({role:'assistant',content:r.reply});
   turn++;const k=r.card==='red'?'red_card':r.card==='yellow'?'yellow_card':r.emotion;
-  lastNonBase=true;setChips(r.categories&&r.categories.length&&!r.card?'cats':k);setEmo(k);if(r.categories&&r.categories.length&&!r.card)showCats(r.categories);else if(r.places&&r.places.length&&!r.card)showPlaces(r.places);else if(r.card||(k!==lastEmo&&k!=='happy'&&turn-lastPop>=3)){popup(k);lastPop=turn}lastEmo=k;setCards(r.yellow,r.card);log.scrollTop=log.scrollHeight;
+  lastNonBase=true;setChips(r.categories&&r.categories.length&&!r.card?'cats':k);setEmo(k);if(r.categories&&r.categories.length&&!r.card)showCats(r.categories);else if(r.places&&r.places.length&&!r.card)showPlaces(r.places);else if(r.card==='red')openApology();else if(r.card||(k!==lastEmo&&k!=='happy'&&turn-lastPop>=3)){popup(k);lastPop=turn}lastEmo=k;setCards(r.yellow,r.card);log.scrollTop=log.scrollHeight;
 }
 const ORDER=['excited','hungry','surprised','happy','sad','angry','annoyed','tired','confused','sleepy','laugh','mischievous','yellow_card','red_card'];
 const src=e=>'slime/sticker/'+String(ORDER.indexOf(e)+1).padStart(2,'0')+'_'+e+'.png';
@@ -141,6 +152,26 @@ function showPlaces(ps,top){
   setTimeout(()=>document.getElementById('rc').className='on',600);
 }
 document.getElementById('rc').onclick=e=>{if(e.target.id==='rc')e.target.className=''};
+function openApology(msg){
+  const m=document.getElementById('ap');m.querySelector('img').src=src('angry');
+  document.getElementById('apt').textContent=msg||'반성문 쓰면 봐줄게';
+  document.getElementById('apr').textContent='';m.className='on';setTimeout(()=>document.getElementById('apx').focus(),300);
+}
+document.getElementById('apc').onclick=()=>{document.getElementById('ap').className=''};
+document.getElementById('aps').onclick=async()=>{
+  const x=document.getElementById('apx'),r_=document.getElementById('apr'),b=document.getElementById('aps'),t=x.value.trim();
+  if(t.length<20){r_.textContent='너무 짧아. 성의 있게 써.';return}
+  b.disabled=true;r_.textContent='와사비가 읽는 중...';
+  const r=await fetch(API+'/apology',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sid,text:t})}).then(r=>r.json()).catch(()=>null);
+  b.disabled=false;
+  if(!r||r.error){r_.textContent=(r&&r.error)||'잠시만 수임아, 나 똥싸고 있어 조금 있다 연락할게';return}
+  r_.innerHTML='<b>'+r.score+'점</b>'+esc(r.comment);
+  if(r.passed)setTimeout(()=>{
+    document.getElementById('ap').className='';x.value='';
+    q.disabled=false;q.placeholder='오늘 저녁 뭐 먹지...';setCards(0,'');lastEmo='happy';setEmo('happy');setChips('happy');
+    add(r.comment,'bot');hist.push({role:'assistant',content:r.comment});
+  },2600);
+};
 function showCats(cs,top){
   const g=document.getElementById('cg');g.innerHTML='';
   document.querySelector('#cat h2').textContent=top?top+' 중에 뭐?':'뭐 땡겨?';
@@ -214,12 +245,12 @@ const SUG={
   mischievous:['추천해줘','내기하자','와사비가 골라줘'],
   cats:['아무거나 정해줘','다시 추천해줘'],
   pick:['다른 종류로 추천해줘','제일 가까운 곳 알려줘','매운 거 땡겨'],
-  yellow_card:['미안해'],red_card:[]};
+  yellow_card:['미안해'],red_card:['반성문 쓰기']};
 function setChips(k){
   const c=document.getElementById('chips');c.innerHTML='';
-  const l=SUG[k]||SUG.base;c.style.display=l.length&&!q.disabled?'flex':'none';
+  const l=SUG[k]||SUG.base;c.style.display=l.length&&(!q.disabled||k==='red_card')?'flex':'none';
   l.forEach(t=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=t;
-    b.onclick=()=>{q.value=t;f.requestSubmit()};c.append(b)});
+    b.onclick=()=>{if(t==='반성문 쓰기'){openApology();return}q.value=t;f.requestSubmit()};c.append(b)});
 }
 setChips('base');
 let lastNonBase=false,lastEmo='happy',popT,turn=0,lastPop=-9;
@@ -238,12 +269,12 @@ function setCards(y,card){
   const c=document.getElementById('cards');c.innerHTML='';
   for(let i=0;i<(card==='red'?0:y);i++)c.innerHTML+='<i class="card y"></i>';
   if(card==='red')c.innerHTML='<i class="card r"></i>';
-  if(card==='red'){document.getElementById('chips').style.display='none';q.disabled=true;q.placeholder='퇴장당했습니다 (내일 다시)'}
+  if(card==='red'){q.disabled=true;q.placeholder='레드카드! 반성문부터 써야 말할 수 있어'}
 }
 setEmo('happy');
 if(!restore())add('수임아 뭐먹을래?','bot');
 fetch(API+'/state?sid='+encodeURIComponent(sid)).then(r=>r.json()).then(s=>{
-  if(s.card){setCards(s.yellow,s.card);setEmo(s.card==='red'?'red_card':'yellow_card');setChips(s.card==='red'?'red_card':'yellow_card')}
+  if(s.card){setCards(s.yellow,s.card);setEmo(s.card==='red'?'red_card':'yellow_card');setChips(s.card==='red'?'red_card':'yellow_card');if(s.card==='red')openApology()}
 }).catch(()=>{});
 </script>
 </body>
