@@ -115,7 +115,16 @@ button:active{transform:translate(4px,4px);box-shadow:none}
 <div id="cat"><div><h2>뭐 땡겨?</h2><div id="cg"></div><p>골라봐 수임아 (바깥 누르면 닫혀)</p></div></div>
 <div id="modal"><div><img alt=""><b></b></div></div>
 <script>
-const API=(()=>{try{const p=new URLSearchParams(location.search).get('api');if(p)localStorage.api=p;return(p||localStorage.api||'').replace(/\/$/,'')}catch(e){return ''}})();
+const API=(()=>{
+  try{
+    const p=new URLSearchParams(location.search).get('api');
+    if(p){localStorage.api=p;return p.replace(/\/$/,'')}
+    if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))return '';
+    try{const x=new XMLHttpRequest();x.open('GET','api.json?t='+Date.now(),false);x.send();
+      if(x.status===200){const a=JSON.parse(x.responseText).api;if(a)return a.replace(/\/$/,'')}}catch(e){}
+    return (localStorage.api||'').replace(/\/$/,'');
+  }catch(e){return ''}
+})();
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const splash=document.getElementById('splash'),log=document.getElementById('log'),f=document.getElementById('f'),q=document.getElementById('q');
 const hist=[{role:'assistant',content:'수임아 뭐먹을래?'}];
