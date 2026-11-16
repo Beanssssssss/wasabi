@@ -83,7 +83,9 @@ header .char{width:56px;height:56px;border-width:3px;box-shadow:3px 3px 0 var(--
 #log{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:16px}
 .msg{max-width:80%;padding:10px 14px;border:4px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-size:20px;line-height:1.4;white-space:pre-wrap}
 .bot{align-self:flex-start;background:#fff}
-.me{align-self:flex-end;background:var(--g)}
+.me{align-self:flex-end;background:var(--g);position:relative;margin-bottom:6px}
+.me.read::after{content:'읽음';position:absolute;right:2px;bottom:-22px;font-size:14px;color:#0E8F3E;animation:rd .3s}
+@keyframes rd{from{opacity:0;transform:translateY(-4px)}}
 #chips{display:flex;gap:8px;overflow-x:auto;padding:10px 14px 0;background:#fff;border-top:5px solid var(--ink);scrollbar-width:none}
 #chips::-webkit-scrollbar{display:none}
 .chip{flex:none;font:inherit;font-size:17px;padding:4px 12px;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:var(--bg);cursor:pointer;white-space:nowrap}
@@ -134,10 +136,10 @@ setTimeout(go,8000);
 }
 f.onsubmit=async e=>{
   e.preventDefault();const t=q.value.trim();if(!t)return;q.value='';
-  add(t,'me');hist.push({role:'user',content:t});
+  const mine=add(t,'me');hist.push({role:'user',content:t});
   const w=add('...','bot');
   const r=await fetch(API+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist,sid})}).then(r=>r.json()).catch(()=>({reply:'잠시만 수임아, 나 똥싸고 있어 조금 있다 연락할게',emotion:'happy',yellow:0,card:''}));
-  (r.lines?burst(w,r.lines):speak(w,r.reply));hist.push({role:'assistant',content:r.reply});
+  mine.classList.add('read');(r.lines?burst(w,r.lines):speak(w,r.reply));hist.push({role:'assistant',content:r.reply});
   turn++;const k=r.card==='red'?'red_card':r.card==='yellow'?'yellow_card':r.emotion;
   lastNonBase=true;setChips(r.categories&&r.categories.length&&!r.card?'cats':k);setEmo(k);if(r.categories&&r.categories.length&&!r.card)showCats(r.categories);else if(r.places&&r.places.length&&!r.card)showPlaces(r.places);else if(r.card==='red')openApology();else if(r.card||(k!==lastEmo&&k!=='happy'&&turn-lastPop>=3)){popup(k);lastPop=turn}lastEmo=k;setCards(r.yellow,r.card);log.scrollTop=log.scrollHeight;
 }
@@ -187,12 +189,12 @@ function showCats(cs,top){
 async function openSub(top){showCats(await fetch(API+'/subcats?cat='+encodeURIComponent(top)).then(r=>r.json()),top)}
 async function pick(top,sub){
   document.getElementById('cat').className='';
-  add(top+(sub?' · '+sub.replace(/,/g,'·'):' 전부'),'me');
+  const mine=add(top+(sub?' · '+sub.replace(/,/g,'·'):' 전부'),'me');
   hist.push({role:'user',content:top+(sub?' · '+sub.replace(/,/g,'·'):' 전부')+' 골랐어'});
   const w=add('...','bot');
   const r=await fetch(API+'/pick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cat:top,sub,messages:hist})}).then(r=>r.json()).catch(()=>({reply:'잠시만 수임아, 나 똥싸고 있어 조금 있다 연락할게',emotion:'happy',places:[]}));
   hist.push({role:'assistant',content:r.reply+(r.places.length?' (지도에 표시한 곳: '+r.places.slice(0,5).map(p=>p.name).join(', ')+')':'')});
-  speak(w,r.reply);setEmo(r.emotion);lastEmo=r.emotion;setChips('pick');showPlaces(r.places,top);log.scrollTop=log.scrollHeight;
+  mine.classList.add('read');speak(w,r.reply);setEmo(r.emotion);lastEmo=r.emotion;setChips('pick');showPlaces(r.places,top);log.scrollTop=log.scrollHeight;
 }
 document.getElementById('cat').onclick=e=>{if(e.target.id==='cat')e.target.className=''};
 function chunks(t){
@@ -219,7 +221,7 @@ function restore(){
   try{
     const d=JSON.parse(localStorage.dm||'null');
     if(!d||!d.msgs||!d.msgs.length)return false;
-    d.msgs.forEach(m=>add(m.t,m.c));
+    d.msgs.forEach((m,i)=>{const el=add(m.t,m.c);if(m.c==='me'&&d.msgs.slice(i+1).some(x=>x.c==='bot'))el.classList.add('read')});
     hist.splice(0,hist.length,...(d.hist||[]));
     lastEmo=ORDER.includes(d.emo)?d.emo:'happy';setEmo(lastEmo);setChips(lastEmo);
     return true;
