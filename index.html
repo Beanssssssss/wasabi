@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>와사비</title>
+<link rel="preload" href="static/fonts/DoHyeon.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="static/fonts/BlackHanSans.ttf" as="font" type="font/ttf" crossorigin>
+<style>
+@font-face{font-family:'Do Hyeon';src:url(static/fonts/DoHyeon.ttf);font-display:block}
+@font-face{font-family:'Black Han Sans';src:url(static/fonts/BlackHanSans.ttf);font-display:block}
+.bob{animation:bob 1.3s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(calc(var(--k) * -5px))}}
+#mt{margin-left:auto;font-size:18px;padding:4px 12px;box-shadow:3px 3px 0 var(--ink);background:#FF8A1F}
+#day{font-family:'Do Hyeon';font-size:18px;background:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:2px 10px}
+#day:empty{display:none}
+:root{--g:#2BD96B;--gd:#0E8F3E;--ink:#111;--bg:#FFF8E7;--sh:6px 6px 0 var(--ink)}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Do Hyeon',sans-serif;background:var(--bg);color:var(--ink);height:100dvh;overflow:hidden}
+/* splash */
+#splash{position:fixed;inset:0;background:var(--g);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;cursor:pointer;transition:transform .6s cubic-bezier(.7,0,.2,1)}
+#v{width:min(70vw,340px);height:0;opacity:0;border:0;background:#fff;box-shadow:var(--sh);object-fit:cover;transition:height .6s cubic-bezier(.3,1.3,.5,1),opacity .4s}
+#v.on{height:min(70vw,340px);opacity:1;border:5px solid var(--ink)}
+#splash.out{transform:translateY(-100%)}
+.char{width:200px;height:200px;border:5px solid var(--ink);background:#fff;box-shadow:var(--sh);display:flex;align-items:center;justify-content:center;font-size:14px;overflow:hidden}
+.char img{width:100%;height:100%;object-fit:cover}
+.title{font-family:'Black Han Sans',sans-serif;font-size:clamp(40px,9vw,92px);line-height:1.1;text-align:center}
+.title span{display:inline-block;background:#fff;border:5px solid var(--ink);box-shadow:var(--sh);padding:4px 18px;margin:6px;animation:pop .5s both}
+.title span:nth-child(2){background:#FFE14D;animation-delay:.25s;transform:rotate(-2deg)}
+@keyframes pop{from{transform:translateY(40px) scale(.6);opacity:0}to{opacity:1}}
+.hint{font-size:18px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+/* chat */
+#app{height:100%;display:flex;flex-direction:column;max-width:720px;margin:0 auto;border-inline:5px solid var(--ink);background:var(--bg)}
+header{background:var(--g);border-bottom:5px solid var(--ink);padding:12px 16px;display:flex;align-items:center;gap:12px;font-family:'Black Han Sans';font-size:26px}
+header .char{width:56px;height:56px;border-width:3px;box-shadow:3px 3px 0 var(--ink);font-size:32px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:10;cursor:pointer}
+#modal.on{display:flex}
+#modal>div{background:var(--g);border:6px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:20px 28px;text-align:center;animation:mpop .35s cubic-bezier(.3,1.6,.5,1)}
+#modal.yellow_card>div{background:#FFE14D}#modal.red_card>div{background:#FF3B30;color:#fff}
+#modal img{width:min(60vw,260px);display:block;margin:0 auto 12px}
+#modal b{font-family:'Black Han Sans';font-size:clamp(28px,6vw,44px);display:block;background:#fff;color:var(--ink);border:4px solid var(--ink);padding:4px 16px}
+@keyframes mpop{from{transform:scale(.4) rotate(-6deg);opacity:0}to{transform:none;opacity:1}}
+#rc{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+#rc.on{display:flex}
+#rc>div{background:var(--bg);border:6px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:18px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;animation:mpop .35s cubic-bezier(.3,1.6,.5,1)}
+#rc h2{font-family:'Black Han Sans';font-size:32px;margin-bottom:12px}
+#rcg{display:grid;gap:14px;margin-bottom:14px}
+.rcard{cursor:pointer;border:4px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:10px 14px;background:#fff}
+.rcard:nth-child(4n+1){background:var(--g)}.rcard:nth-child(4n+2){background:#FFE14D}.rcard:nth-child(4n+3){background:#FF9ECF}.rcard:nth-child(4n+4){background:#8EC5FF}
+.rcard b{font-family:'Black Han Sans';font-size:24px;display:block}
+.rcard span.tag{display:inline-block;background:#fff;border:3px solid var(--ink);padding:0 8px;font-size:15px;margin:4px 6px 4px 0}
+.rcard p{font-size:16px;margin:2px 0}
+.rcard a{display:inline-block;margin-top:6px;color:var(--ink);background:#fff;border:3px solid var(--ink);padding:2px 10px;font-size:16px;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
+#cat{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+#cat.on{display:flex}
+#cat>div{background:var(--bg);border:6px solid var(--ink);box-shadow:10px 10px 0 var(--ink);padding:18px;max-width:520px;width:100%;animation:mpop .35s cubic-bezier(.3,1.6,.5,1)}
+#cat h2{font-family:'Black Han Sans';font-size:34px;margin-bottom:14px}
+#cat p{margin-top:12px;font-size:16px}
+#cg{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.cc{font:inherit;font-size:26px;padding:18px 8px;border:5px solid var(--ink);box-shadow:5px 5px 0 var(--ink);cursor:pointer;display:flex;flex-direction:column;gap:4px;align-items:center}
+.cc small{font-size:15px}
+.cc:nth-child(1){background:var(--g)}.cc:nth-child(2){background:#FFE14D}.cc:nth-child(3){background:#FF8A1F}.cc:nth-child(4){background:#8EC5FF}.cc:nth-child(5){background:#FF9ECF}.cc:nth-child(6){background:#fff}
+.pin{background:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:2px 8px;font:16px 'Do Hyeon',sans-serif;white-space:nowrap}.pin.gym{background:#FF8A1F}
+.cc:active{transform:translate(5px,5px);box-shadow:none}
+#cards{display:flex;gap:6px}
+#nw{font-size:14px;padding:2px 8px;box-shadow:3px 3px 0 var(--ink);background:#fff}
+.card{display:block;width:18px;height:26px;border:3px solid var(--ink);box-shadow:2px 2px 0 var(--ink);transform:rotate(8deg)}
+.card.y{background:#FFE14D}.card.r{background:#FF3B30;width:22px;height:30px}
+#log{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:16px}
+.msg{max-width:80%;padding:10px 14px;border:4px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-size:20px;line-height:1.4;white-space:pre-wrap}
+.bot{align-self:flex-start;background:#fff}
+.me{align-self:flex-end;background:var(--g)}
+#chips{display:flex;gap:8px;overflow-x:auto;padding:10px 14px 0;background:#fff;border-top:5px solid var(--ink);scrollbar-width:none}
+#chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font:inherit;font-size:17px;padding:4px 12px;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);background:var(--bg);cursor:pointer;white-space:nowrap}
+.chip:nth-child(3n+1){background:#FFE14D}.chip:nth-child(3n+2){background:var(--g)}
+.chip:active{transform:translate(3px,3px);box-shadow:none}
+#chips+form{border-top:0}
+form{display:flex;gap:10px;padding:14px;border-top:5px solid var(--ink);background:#fff}
+input{flex:1;font:inherit;font-size:20px;padding:10px 14px;border:4px solid var(--ink);background:var(--bg);outline:none}
+input:focus{box-shadow:4px 4px 0 var(--gd)}
+button{font:inherit;font-size:20px;padding:10px 20px;border:4px solid var(--ink);background:var(--g);box-shadow:4px 4px 0 var(--ink);cursor:pointer}
+button:active{transform:translate(4px,4px);box-shadow:none}
+</style>
+</head>
+<body>
+<div id="splash">
+  <div class="title"><span>수임아</span><span>뭐먹을래?</span></div>
+  <video id="v" src="slime_eating.mp4" muted playsinline preload="auto"></video>
+</div>
+<div id="app">
+  <header><div class="char" id="av"></div>와사비<span id="cards"></span><button id="nw" type="button" title="새 대화">새로</button><span id="day"></span></header>
+    <div id="log"></div>
+  <div id="chips"></div>
+  <form id="f"><input id="q" autocomplete="off" placeholder="오늘 저녁 뭐 먹지..."><button>전송</button></form>
+</div>
+<div id="rc"><div><h2>와사비 추천!</h2><div id="rcg"></div></div></div>
+<div id="cat"><div><h2>뭐 땡겨?</h2><div id="cg"></div><p>골라봐 수임아 (바깥 누르면 닫혀)</p></div></div>
+<div id="modal"><div><img alt=""><b></b></div></div>
+<script>
+const API=(()=>{try{const p=new URLSearchParams(location.search).get('api');if(p)localStorage.api=p;return(p||localStorage.api||'').replace(/\/$/,'')}catch(e){return ''}})();
+const splash=document.getElementById('splash'),log=document.getElementById('log'),f=document.getElementById('f'),q=document.getElementById('q');
+const hist=[{role:'assistant',content:'수임아 뭐먹을래?'}];
+document.fonts.load('20px "Do Hyeon"','가나다');document.fonts.load('20px "Black Han Sans"','가나다');
+fetch(API+'/config').then(r=>r.json()).then(c=>{document.getElementById('day').textContent=c.day+(c.note?' - '+c.note:'');if(!lastNonBase)setChips(c.note?'mon':'base')});
+
+
+function add(t,c){const d=document.createElement('div');d.className='msg '+c;d.textContent=t;log.append(d);log.scrollTop=log.scrollHeight;setTimeout(save,0);return d}
+function go(){splash.classList.add('out');q.focus()}
+const v=document.getElementById('v');
+splash.onclick=go;
+setTimeout(()=>{v.classList.add('on');v.play().catch(()=>{})},1300);
+v.onended=()=>setTimeout(go,500);
+v.onerror=()=>setTimeout(go,1500);
+setTimeout(go,8000);
+f.onsubmit=async e=>{
+  e.preventDefault();const t=q.value.trim();if(!t)return;q.value='';
+  add(t,'me');hist.push({role:'user',content:t});
+  const w=add('...','bot');
+  const r=await fetch(API+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist,sid})}).then(r=>r.json()).catch(()=>({reply:'잠시만 수임아, 나 똥싸고 있어 조금 있다 연락할게',emotion:'happy',yellow:0,card:''}));
+  (r.lines?burst(w,r.lines):speak(w,r.reply));hist.push({role:'assistant',content:r.reply});
+  turn++;const k=r.card==='red'?'red_card':r.card==='yellow'?'yellow_card':r.emotion;
+  lastNonBase=true;setChips(r.categories&&r.categories.length&&!r.card?'cats':k);setEmo(k);if(r.categories&&r.categories.length&&!r.card)showCats(r.categories);else if(r.places&&r.places.length&&!r.card)showPlaces(r.places);else if(r.card||(k!==lastEmo&&k!=='happy'&&turn-lastPop>=3)){popup(k);lastPop=turn}lastEmo=k;setCards(r.yellow,r.card);log.scrollTop=log.scrollHeight;
+}
+const ORDER=['excited','hungry','surprised','happy','sad','angry','annoyed','tired','confused','sleepy','laugh','mischievous','yellow_card','red_card'];
+const src=e=>'slime/sticker/'+String(ORDER.indexOf(e)+1).padStart(2,'0')+'_'+e+'.png';
+let sid;try{sid=localStorage.sid||(localStorage.sid=crypto.randomUUID())}catch(e){sid=Math.random().toString(36).slice(2)}
+let RP=[],RT='';
+function showPlaces(ps,top){
+  if(!ps||!ps.length)return;RP=ps;RT=top||ps[0].cat;
+  const g=document.getElementById('rcg');g.innerHTML='';
+  ps.slice(0,8).forEach(p=>{const d=document.createElement('div');d.className='rcard';d.onclick=e=>{if(e.target.tagName!=='A')window.open(p.url,'_blank','noopener')};
+    d.innerHTML='<b>'+esc(p.name)+'</b><span class="tag">'+esc(p.cat)+(p.sub&&p.sub!=='기타'?' · '+esc(p.sub.replace(/,/g,'·')):'')+'</span><span class="tag">걸어서 '+Math.max(1,Math.round(p.dist/80))+'분 · '+p.dist+'m</span>'
+      +'<p>'+esc(p.addr)+'</p>'+(p.phone?'<p>'+esc(p.phone)+'</p>':'')+'<a href="'+esc(p.url)+'" target="_blank" rel="noopener">카카오맵에서 보기</a>';
+    g.append(d)});
+  setTimeout(()=>document.getElementById('rc').className='on',600);
+}
+document.getElementById('rc').onclick=e=>{if(e.target.id==='rc')e.target.className=''};
+function showCats(cs,top){
+  const g=document.getElementById('cg');g.innerHTML='';
+  document.querySelector('#cat h2').textContent=top?top+' 중에 뭐?':'뭐 땡겨?';
+  const mk=(label,small,fn)=>{const b=document.createElement('button');b.type='button';b.className='cc';
+    b.innerHTML=label+(small?'<small>'+small+'</small>':'');b.onclick=fn;g.append(b)};
+  cs.forEach(c=>mk(c.name.replace(/,/g,'·'),c.count+'곳',()=>top?pick(top,c.name):openSub(c.name)));
+  if(top)mk('전부 다','',()=>pick(top,''));
+  document.getElementById('cat').className='on';
+}
+async function openSub(top){showCats(await fetch(API+'/subcats?cat='+encodeURIComponent(top)).then(r=>r.json()),top)}
+async function pick(top,sub){
+  document.getElementById('cat').className='';
+  add(top+(sub?' · '+sub.replace(/,/g,'·'):' 전부'),'me');
+  hist.push({role:'user',content:top+(sub?' · '+sub.replace(/,/g,'·'):' 전부')+' 골랐어'});
+  const w=add('...','bot');
+  const r=await fetch(API+'/pick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cat:top,sub,messages:hist})}).then(r=>r.json()).catch(()=>({reply:'잠시만 수임아, 나 똥싸고 있어 조금 있다 연락할게',emotion:'happy',places:[]}));
+  hist.push({role:'assistant',content:r.reply+(r.places.length?' (지도에 표시한 곳: '+r.places.slice(0,5).map(p=>p.name).join(', ')+')':'')});
+  speak(w,r.reply);setEmo(r.emotion);lastEmo=r.emotion;setChips('pick');showPlaces(r.places,top);log.scrollTop=log.scrollHeight;
+}
+document.getElementById('cat').onclick=e=>{if(e.target.id==='cat')e.target.className=''};
+function chunks(t){
+  if(t.length<=36)return [t];
+  const parts=t.match(/[^.!?~\n]+[.!?~]*\s*/g)||[t],out=[];let cur='';
+  parts.forEach(p=>{p=p.trim();if(!p)return;
+    if(cur&&(cur+' '+p).length>30){out.push(cur);cur=p}else cur=cur?cur+' '+p:p});
+  if(cur)out.push(cur);return out.length?out:[t];
+}
+async function speak(w,t){
+  const c=chunks(t);w.textContent=c[0];setTimeout(save,0);
+  for(const x of c.slice(1)){await new Promise(r=>setTimeout(r,800));add(x,'bot')}
+  log.scrollTop=log.scrollHeight;setTimeout(save,0);
+}
+async function burst(w,ls){
+  w.textContent=ls[0];setTimeout(save,0);
+  for(const x of ls.slice(1)){await new Promise(r=>setTimeout(r,900));add(x,'bot')}
+  setTimeout(save,0);
+}
+function save(){
+  try{localStorage.dm=JSON.stringify({msgs:[...log.children].map(el=>({c:el.classList.contains('me')?'me':'bot',t:el.textContent})).filter(m=>m.t!=='...').slice(-80),hist:hist.slice(-30),emo:lastEmo,sid})}catch(e){}
+}
+function restore(){
+  try{
+    const d=JSON.parse(localStorage.dm||'null');
+    if(!d||!d.msgs||!d.msgs.length)return false;
+    d.msgs.forEach(m=>add(m.t,m.c));
+    hist.splice(0,hist.length,...(d.hist||[]));
+    lastEmo=ORDER.includes(d.emo)?d.emo:'happy';setEmo(lastEmo);setChips(lastEmo);
+    return true;
+  }catch(e){return false}
+}
+function fresh(){
+  try{localStorage.removeItem('dm')}catch(e){}
+  log.innerHTML='';hist.splice(0,hist.length,{role:'assistant',content:'수임아 뭐먹을래?'});
+  lastEmo='happy';setEmo('happy');setChips('base');add('수임아 뭐먹을래?','bot');
+}
+document.getElementById('nw').onclick=()=>{if(confirm('대화 기록을 지우고 새로 시작할까?'))fresh()};
+const SUG={
+  base:['추천해줘','배고파 죽겠다','매운 거 땡겨','혼밥하기 좋은 곳','와사비 귀여워','와사비 아빠 누구야'],
+  mon:['추천해줘','운동 전에 뭐 먹지?','가볍게 먹을 거','빨리 나오는 거','와사비 귀여워','와사비 아빠 누구야'],
+  hungry:['추천해줘','든든한 거','국물 있는 거'],
+  excited:['추천해줘','오늘은 좀 특별한 거','같이 먹을 사람 있어'],
+  happy:['추천해줘','와사비 귀여워','와사비 아빠 누구야','가볍게 먹을 거'],
+  laugh:['추천해줘','와사비 아빠 누구야','배고파 죽겠다'],
+  surprised:['진짜야?','추천해줘','다른 거 없어?'],
+  confused:['추천해줘','아무거나 정해줘','고민돼'],
+  sad:['달달한 거 먹고 싶어','위로되는 음식','혼자 먹어도 돼?'],
+  annoyed:['미안해','추천해줘','매운 거 땡겨'],
+  angry:['미안해','화 풀어줘'],
+  tired:['가볍게 먹을 거','빨리 나오는 거','추천해줘'],
+  sleepy:['간단하게 먹을래','편의점 갈까','추천해줘'],
+  mischievous:['추천해줘','내기하자','와사비가 골라줘'],
+  cats:['아무거나 정해줘','다시 추천해줘'],
+  pick:['다른 종류로 추천해줘','제일 가까운 곳 알려줘','매운 거 땡겨'],
+  yellow_card:['미안해'],red_card:[]};
+function setChips(k){
+  const c=document.getElementById('chips');c.innerHTML='';
+  const l=SUG[k]||SUG.base;c.style.display=l.length&&!q.disabled?'flex':'none';
+  l.forEach(t=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=t;
+    b.onclick=()=>{q.value=t;f.requestSubmit()};c.append(b)});
+}
+setChips('base');
+let lastNonBase=false,lastEmo='happy',popT,turn=0,lastPop=-9;
+const LABEL={excited:'와사비 신남',hungry:'와사비 배고픔',surprised:'와사비 놀람',happy:'와사비 기쁨',sad:'와사비 슬픔',angry:'와사비 화남',annoyed:'와사비 짜증',tired:'와사비 피곤',confused:'와사비 당황',sleepy:'와사비 졸림',laugh:'와사비 빵터짐',mischievous:'와사비 장난꾸러기',yellow_card:'너 경고 한장이야',red_card:'레드카드! 퇴장이야'};
+function popup(k){
+  const m=document.getElementById('modal');
+  m.querySelector('img').src=src(k);m.querySelector('b').textContent=LABEL[k]||'';
+  m.className='on '+k;clearTimeout(popT);popT=setTimeout(()=>m.className='',k==='red_card'?3000:1800);
+}
+document.getElementById('modal').onclick=e=>e.currentTarget.className='';
+function setEmo(e){
+  e=ORDER.includes(e)?e:'happy';
+  document.getElementById('av').innerHTML='<img src="'+src(e)+'" alt="">';
+}
+function setCards(y,card){
+  const c=document.getElementById('cards');c.innerHTML='';
+  for(let i=0;i<(card==='red'?0:y);i++)c.innerHTML+='<i class="card y"></i>';
+  if(card==='red')c.innerHTML='<i class="card r"></i>';
+  if(card==='red'){document.getElementById('chips').style.display='none';q.disabled=true;q.placeholder='퇴장당했습니다 (내일 다시)'}
+}
+setEmo('happy');
+if(!restore())add('수임아 뭐먹을래?','bot');
+fetch(API+'/state?sid='+encodeURIComponent(sid)).then(r=>r.json()).then(s=>{
+  if(s.card){setCards(s.yellow,s.card);setEmo(s.card==='red'?'red_card':'yellow_card');setChips(s.card==='red'?'red_card':'yellow_card')}
+}).catch(()=>{});
+</script>
+</body>
+</html>
